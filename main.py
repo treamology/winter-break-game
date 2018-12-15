@@ -41,15 +41,15 @@ base.world.set_debug_node(debug_node)
 player = Player()
 player.add_to_world()
 
-def update(task):
+def physics_update(task):
 	# Progress the physics world every frame
 	dt = globalClock.get_dt()
 	base.world.do_physics(dt)
-
-	player.process_inputs()
 	
 	return task.cont
-base.task_mgr.add(update, 'update')
+base.task_mgr.add(physics_update, "phsyics_update")
+
+base.task_mgr.add(player.process_inputs, "input_update")
 
 # Kick off the game loop
 base.run()

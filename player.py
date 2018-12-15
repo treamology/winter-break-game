@@ -4,9 +4,13 @@ from panda3d.bullet import BulletRigidBodyNode, BulletSphereShape
 from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND
 from controls import control_state
 
+from math import copysign
+
 class Player(object):
 
-	ground_torque_speed = 30
+	ground_accel = 30
+	stop_threshold = 0.2
+	max_speed = 30
 
 	def __init__(self):
 		self.shape = BulletSphereShape(1)
@@ -14,8 +18,11 @@ class Player(object):
 		self.node = BulletRigidBodyNode("Player")
 		self.node.set_mass(1)
 		self.node.add_shape(self.shape)
-		self.node.set_friction(10)
-		# self.node.deactivation_enabled = False
+		self.node.set_linear_sleep_threshold(100)
+		#self.node.set_angular_sleep_threshold(100)
+
+		# We're controlling the acceleration ourselves, we don't want friction interfering
+		self.node.set_friction(0)
 
 		self.nodepath = NodePath(self.node)
 
@@ -26,15 +33,47 @@ class Player(object):
 		base.world.attach_rigid_body(self.node)
 		self.nodepath.reparent_to(base.render)
 
-	def process_inputs(self):
-		total_torque = Vec3(0, 0, 0)
+	def process_inputs(self, task):
+		total_force = Vec3(0, 0, 0)
 
-		total_torque.x += control_state[FORWARD_BIND] * -self.ground_torque_speed
-		total_torque.x += control_state[BACKWARD_BIND] * self.ground_torque_speed
-		total_torque.y += control_state[LEFT_BIND] * -self.ground_torque_speed
-		total_torque.y += control_state[RIGHT_BIND] * self.ground_torque_speed
+		total_force.y += control_state[FORWARD_BIND] * self.ground_accel
+		total_force.y += control_state[BACKWARD_BIND] * -self.ground_accel
+		total_force.x += control_state[LEFT_BIND] * -self.ground_accel
+		total_force.x += control_state[RIGHT_BIND] * self.ground_accel
 
-		if (total_torque != Vec3.zero() and not self.node.is_active()):
-			self.node.set_active(True)			
+		if total_force != Vec3.zero() and not self.node.is_active():
+			self.node.set_active(True)
 
-		self.node.apply_torque(total_torque)
+		# Nothing is being input, so slow down the sphere so it doesn't roll off to infinity
+		if total_force == Vec3.zero():
+			total_force = -self.node.get_linear_velocity()
+			total_force.normalize()
+			total_force *= 30
+			total_force.set_z(0)
+
+		self.node.apply_central_force(total_force)
+
+		linvel = self.node.get_linear_velocity()
+		# If the velocity is below a certain point, just stop it.
+		if linvel.get_xy().length() < self.stop_threshold:
+			vel = Vec3()
+			vel.set_z(linvel.get_z())
+			self.node.set_linear_velocity(vel)
+		# Limit the velocity if we're going too fast
+		elif linvel.get_xy().length() >= self.max_speed:
+			vel = linvel
+			linvel.normalize()
+			vel.set_x(self.max_speed * linvel.get_x())
+			vel.set_y(self.max_speed * linvel.get_y())
+			self.node.set_linear_velocity(vel)
+
+		# Rotate the sphere to make it look like it's rolling
+		angular_velocity = self.node.get_linear_velocity() / self.shape.get_radius() # v = ωr
+		angular_velocity.set_z(0)
+		x_vel = angular_velocity.get_x()
+		angular_velocity.set_x(-angular_velocity.get_y())
+		angular_velocity.set_y(x_vel)
+
+		self.node.set_angular_velocity(angular_velocity)
+
+		return task.cont
