@@ -8,7 +8,8 @@ from math import copysign
 
 class Player(object):
 
-	ground_accel = 30
+	ground_accel = 90
+	slowdown_rate = 45
 	stop_threshold = 0.5
 	max_speed = 30
 
@@ -50,7 +51,7 @@ class Player(object):
 			vel.set_z(linvel.get_z())
 			self.node.set_linear_velocity(vel)
 		# Limit the velocity if we're going too fast
-		elif linvel.get_xy().length() >= self.max_speed:
+		elif linvel.get_xy().length() > self.max_speed:
 			vel = linvel
 			linvel.normalize()
 			vel.set_x(self.max_speed * linvel.get_x())
@@ -60,7 +61,7 @@ class Player(object):
 		elif total_force == Vec3.zero():
 			total_force = -self.node.get_linear_velocity()
 			total_force.normalize()
-			total_force *= 30
+			total_force *= self.slowdown_rate
 			total_force.set_z(0)
 
 		self.node.apply_central_force(total_force)
