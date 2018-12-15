@@ -9,7 +9,7 @@ from math import copysign
 class Player(object):
 
 	ground_accel = 30
-	stop_threshold = 0.2
+	stop_threshold = 0.5
 	max_speed = 30
 
 	def __init__(self):
@@ -18,8 +18,6 @@ class Player(object):
 		self.node = BulletRigidBodyNode("Player")
 		self.node.set_mass(1)
 		self.node.add_shape(self.shape)
-		self.node.set_linear_sleep_threshold(100)
-		#self.node.set_angular_sleep_threshold(100)
 
 		# We're controlling the acceleration ourselves, we don't want friction interfering
 		self.node.set_friction(0)
@@ -44,16 +42,8 @@ class Player(object):
 		if total_force != Vec3.zero() and not self.node.is_active():
 			self.node.set_active(True)
 
-		# Nothing is being input, so slow down the sphere so it doesn't roll off to infinity
-		if total_force == Vec3.zero():
-			total_force = -self.node.get_linear_velocity()
-			total_force.normalize()
-			total_force *= 30
-			total_force.set_z(0)
-
-		self.node.apply_central_force(total_force)
-
 		linvel = self.node.get_linear_velocity()
+		
 		# If the velocity is below a certain point, just stop it.
 		if linvel.get_xy().length() < self.stop_threshold:
 			vel = Vec3()
@@ -66,6 +56,14 @@ class Player(object):
 			vel.set_x(self.max_speed * linvel.get_x())
 			vel.set_y(self.max_speed * linvel.get_y())
 			self.node.set_linear_velocity(vel)
+		# Nothing is being input, so slow down the sphere so it doesn't roll off to infinity
+		elif total_force == Vec3.zero():
+			total_force = -self.node.get_linear_velocity()
+			total_force.normalize()
+			total_force *= 30
+			total_force.set_z(0)
+
+		self.node.apply_central_force(total_force)
 
 		# Rotate the sphere to make it look like it's rolling
 		angular_velocity = self.node.get_linear_velocity() / self.shape.get_radius() # v = ωr
