@@ -1,17 +1,18 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 
-from panda3d.core import Vec3
+from panda3d.core import Vec3, loadPrcFile
 from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode
 from panda3d.bullet import BulletDebugNode
 
 from player import Player
 import controls
 
+loadPrcFile("config.prc")
+
 # Initialize ShowBase and some basic options.
 base = ShowBase()
 base.disable_mouse()
-base.set_frame_rate_meter(True)
 
 # Set the camera to a test location
 base.camera.set_pos(0, -30, 15)
@@ -27,7 +28,6 @@ base.world.set_gravity(Vec3(0, 0, -9.81))
 # Set up the ground, which is an infinite plane (for now)
 ground_node = BulletRigidBodyNode("Ground")
 ground_node.add_shape(BulletPlaneShape(Vec3(0, 0, 1), 1)) # normal, const)
-ground_node.set_friction(10)
 ground_nodepath = base.render.attach_new_node(ground_node)
 ground_nodepath.set_z(-10)
 base.world.attach_rigid_body(ground_node)
@@ -47,8 +47,8 @@ def physics_update(task):
 	base.world.do_physics(dt)
 	
 	return task.cont
-base.task_mgr.add(physics_update, "phsyics_update")
 
+base.task_mgr.add(physics_update, "phsyics_update")
 base.task_mgr.add(player.process_inputs, "input_update")
 
 # Kick off the game loop
