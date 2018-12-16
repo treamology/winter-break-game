@@ -7,6 +7,7 @@ from controls import control_state
 from projectile import Projectile
 
 import colgroups
+from camera import CameraControl
 
 class Player(object):
 
@@ -41,7 +42,8 @@ class Player(object):
 		self.aim_node.set_color(0, 1, 0, 1)
 		self.aim_node.set_pos(0, 5, 0)
 
-		self.projectiles = []
+		self.cam_control = CameraControl(self.nodepath)
+		self.cam_control.take_camera_control()
 
 	def add_to_world(self):
 		base.world.attach_rigid_body(self.node)
@@ -93,5 +95,4 @@ class Player(object):
 		if control_state[FIRE_BIND] == 1:
 			projectile = Projectile()
 			projectile.fire(self.nodepath.get_pos(), Vec3(0, 1, 0))
-			self.projectiles.append(projectile)
 		return task.cont
