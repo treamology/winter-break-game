@@ -7,8 +7,8 @@ class CameraControl(object):
 	prev_mouse_x = None
 	prev_mouse_y = None
 
-	cam_hover_distance = 2
-	dist_from_player = 25
+	cam_hover_distance = 3
+	dist_from_player = 20
 
 	cam_heading = 0
 	cam_pitch = 0
