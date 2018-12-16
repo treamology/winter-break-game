@@ -1,17 +1,19 @@
-from panda3d.core import NodePath, Vec3
+from panda3d.core import NodePath, Vec3, PandaNode, BitMask32
 from panda3d.bullet import BulletRigidBodyNode, BulletSphereShape
 
-from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND
+from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND, FIRE_BIND
 from controls import control_state
 
-from math import copysign
+from projectile import Projectile
+
+import colgroups
 
 class Player(object):
 
 	ground_accel = 90
 	slowdown_rate = 45
 	stop_threshold = 0.5
-	max_speed = 30
+	max_speed = 20
 
 	def __init__(self):
 		self.shape = BulletSphereShape(1)
@@ -24,9 +26,22 @@ class Player(object):
 		self.node.set_friction(0)
 
 		self.nodepath = NodePath(self.node)
+		self.nodepath.set_collide_mask(BitMask32.bit(colgroups.PLAYER_GROUP))
 
 		self.model_node = base.loader.load_model("models/smiley.egg")
 		self.model_node.reparent_to(self.nodepath)
+
+		self.lock_node = NodePath(PandaNode("lock_node"))
+		self.lock_node.reparent_to(self.nodepath)
+		self.lock_node.set_compass()
+
+		self.aim_node = base.loader.load_model("models/smiley.egg")
+		self.aim_node.reparent_to(self.lock_node)
+		self.aim_node.set_scale(0.2)
+		self.aim_node.set_color(0, 1, 0, 1)
+		self.aim_node.set_pos(0, 5, 0)
+
+		self.projectiles = []
 
 	def add_to_world(self):
 		base.world.attach_rigid_body(self.node)
@@ -75,4 +90,8 @@ class Player(object):
 
 		self.node.set_angular_velocity(angular_velocity)
 
+		if control_state[FIRE_BIND] == 1:
+			projectile = Projectile()
+			projectile.fire(self.nodepath.get_pos(), Vec3(0, 1, 0))
+			self.projectiles.append(projectile)
 		return task.cont

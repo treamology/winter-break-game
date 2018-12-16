@@ -1,11 +1,10 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 
-from panda3d.core import Vec3, loadPrcFile
+from panda3d.core import Vec3, loadPrcFile, BitMask32
 from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode
 from panda3d.bullet import BulletDebugNode
 
-from player import Player
 import controls
 
 loadPrcFile("config.prc")
@@ -25,11 +24,17 @@ controls.setup_controls()
 base.world = BulletWorld()
 base.world.set_gravity(Vec3(0, 0, -9.81))
 
+# Now that we have the basic stuff set up, we can continue importing things that
+# depend on it existing.
+import colgroups
+from player import Player
+
 # Set up the ground, which is an infinite plane (for now)
 ground_node = BulletRigidBodyNode("Ground")
 ground_node.add_shape(BulletPlaneShape(Vec3(0, 0, 1), 1)) # normal, const)
 ground_nodepath = base.render.attach_new_node(ground_node)
 ground_nodepath.set_z(-10)
+ground_nodepath.set_collide_mask(BitMask32.bit(colgroups.ENV_GROUP))
 base.world.attach_rigid_body(ground_node)
 
 # Set up the bullet debug renderer so we can see what's happening
@@ -48,8 +53,8 @@ def physics_update(task):
 	
 	return task.cont
 
-base.task_mgr.add(physics_update, "phsyics_update")
-base.task_mgr.add(player.process_inputs, "input_update")
+base.task_mgr.add(physics_update, "phsyics_update", sort=2)
+base.task_mgr.add(player.process_inputs, "input_update", sort=1)
 
 # Kick off the game loop
 base.run()
