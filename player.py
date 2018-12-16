@@ -6,6 +6,8 @@ from controls import control_state
 
 from projectile import Projectile
 
+from math import sin, cos, radians
+
 import colgroups
 from camera import CameraControl
 
@@ -52,10 +54,18 @@ class Player(object):
 	def process_inputs(self, task):
 		total_force = Vec3(0, 0, 0)
 
-		total_force.y += control_state[FORWARD_BIND] * self.ground_accel
-		total_force.y += control_state[BACKWARD_BIND] * -self.ground_accel
-		total_force.x += control_state[LEFT_BIND] * -self.ground_accel
-		total_force.x += control_state[RIGHT_BIND] * self.ground_accel
+		if control_state[FORWARD_BIND] != 0:
+			total_force.x += control_state[FORWARD_BIND] * self.ground_accel * sin(radians(self.cam_control.cam_heading))
+			total_force.y += control_state[FORWARD_BIND] * self.ground_accel * cos(radians(self.cam_control.cam_heading))
+		if control_state[BACKWARD_BIND] != 0:
+			total_force.x += control_state[BACKWARD_BIND] * -self.ground_accel * sin(radians(self.cam_control.cam_heading))
+			total_force.y += control_state[BACKWARD_BIND] * -self.ground_accel * cos(radians(self.cam_control.cam_heading))
+		if control_state[LEFT_BIND] != 0:
+			total_force.x += control_state[LEFT_BIND] * -self.ground_accel * cos(radians(self.cam_control.cam_heading))
+			total_force.y += control_state[LEFT_BIND] * self.ground_accel * sin(radians(self.cam_control.cam_heading))
+		if control_state[RIGHT_BIND] != 0:
+			total_force.x += control_state[RIGHT_BIND] * self.ground_accel * cos(radians(self.cam_control.cam_heading))
+			total_force.y += control_state[RIGHT_BIND] * -self.ground_accel * sin(radians(self.cam_control.cam_heading))
 
 		if total_force != Vec3.zero() and not self.node.is_active():
 			self.node.set_active(True)
