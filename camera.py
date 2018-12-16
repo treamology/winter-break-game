@@ -43,6 +43,7 @@ class CameraControl(object):
 			self.cam_heading += dx * self.mouse_sens
 			self.cam_pitch += dy * self.mouse_sens
 
+			# Limit the angles the camera can rotate vertically
 			self.cam_pitch = max(-90, min(self.cam_pitch, 60))
 
 		self.rot_origin.set_h(-self.cam_heading)
@@ -51,6 +52,8 @@ class CameraControl(object):
 		self.prev_mouse_x = self.mw.get_mouse_x()
 		self.prev_mouse_y = self.mw.get_mouse_y()
 
+		# To prevent the camera from entering the environment, we shoot a ray between the player and the camera's default position.
+		# If the ray hits something, move the camera to the point on the ray it's being hit.
 		global_cam_pos = self.cam_origin.get_net_transform().get_pos()
 		global_player_pos = self.player_node.get_net_transform().get_pos()
 		cam_origin_dir_vec = global_cam_pos - global_player_pos
@@ -60,9 +63,7 @@ class CameraControl(object):
 
 		result = base.world.ray_test_closest(global_player_pos, global_max_cam_extension)
 
-		hit_frac = 1
-		if result.has_hit():
-			hit_frac = result.get_hit_fraction()
+		hit_frac = result.get_hit_fraction() if result.has_hit() else 1
 
 		self.cam_origin.set_y(-self.dist_from_player * hit_frac)
 

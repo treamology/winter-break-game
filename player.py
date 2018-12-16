@@ -18,6 +18,11 @@ class Player(object):
 	stop_threshold = 0.5
 	max_speed = 20
 
+	bullet_speed = 2
+	fire_rate = 0.2
+
+	fire_accum = 0
+
 	def __init__(self):
 		self.shape = BulletSphereShape(1)
 
@@ -37,12 +42,6 @@ class Player(object):
 		self.lock_node = NodePath(PandaNode("lock_node"))
 		self.lock_node.reparent_to(self.nodepath)
 		self.lock_node.set_compass()
-
-		self.aim_node = base.loader.load_model("models/smiley.egg")
-		self.aim_node.reparent_to(self.lock_node)
-		self.aim_node.set_scale(0.2)
-		self.aim_node.set_color(0, 1, 0, 1)
-		self.aim_node.set_pos(0, 5, 0)
 
 		self.cam_control = CameraControl(self.nodepath)
 		self.cam_control.take_camera_control()
@@ -103,6 +102,12 @@ class Player(object):
 		self.node.set_angular_velocity(angular_velocity)
 
 		if control_state[FIRE_BIND] == 1:
-			projectile = Projectile()
-			projectile.fire(self.nodepath.get_pos(), Vec3(0, 1, 0))
+			if (self.fire_accum >= self.fire_rate):
+				projectile = Projectile()
+				projectile.fire(self.nodepath.get_pos(), Vec3(sin(radians(self.cam_control.cam_heading)), cos(radians(self.cam_control.cam_heading)), 0) * self.bullet_speed)
+				self.fire_accum = 0
+
+		if (self.fire_accum < self.fire_rate):
+			self.fire_accum += globalClock.get_dt()
+
 		return task.cont
