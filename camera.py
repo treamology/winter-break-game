@@ -1,6 +1,10 @@
 from panda3d.bullet import BulletSphereShape, BulletGhostNode
-from panda3d.core import PandaNode, NodePath, Vec3
+from panda3d.core import PandaNode, NodePath, Vec3, TransparencyAttrib, SamplerState
+
+from direct.gui.OnscreenImage import OnscreenImage
+
 import math, colgroups
+from lui.LUISprite import LUISprite
 
 class CameraControl(object):
 
@@ -26,6 +30,15 @@ class CameraControl(object):
 		self.cam_origin = NodePath(PandaNode("cam_origin"))
 		self.cam_origin.reparent_to(self.rot_origin)
 		self.cam_origin.set_pos(0, -self.dist_from_player, 0)
+
+		# self.abs_crosshair = OnscreenImage(image = "assets/ui/crosshair.png", pos=(0, 0, 0))
+		# self.abs_crosshair.set_transparency(TransparencyAttrib.MAlpha)
+		self.abs_crosshair_tex = loader.load_texture("assets/ui/crosshair.png")
+		self.abs_crosshair_tex.setMinfilter(SamplerState.FT_nearest)
+		self.abs_crosshair_tex.setMagfilter(SamplerState.FT_nearest)
+		self.abs_crosshair = LUISprite(base.lui_region.root, self.abs_crosshair_tex)
+		self.abs_crosshair.set_centered(True, True)
+		self.abs_crosshair.set_size(14, 14)
 
 	def take_camera_control(self):
 		base.camera.reparent_to(self.cam_origin)

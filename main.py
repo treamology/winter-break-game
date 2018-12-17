@@ -1,17 +1,21 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 
-from panda3d.core import Vec3, loadPrcFile, BitMask32, WindowProperties, PointLight, Material
+from panda3d.core import Vec3, Vec4, loadPrcFile, BitMask32, WindowProperties, PointLight, Material
 from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, BulletBoxShape, BulletTriangleMesh, BulletTriangleMeshShape
 from panda3d.bullet import BulletDebugNode
 
 import controls
+from lui.LUIRegion import LUIRegion
 
 loadPrcFile("config.prc")
 
 # Initialize ShowBase and some basic options.
 base = ShowBase()
 base.disable_mouse()
+
+# Set up LUI
+base.lui_region = LUIRegion.make("HUD", base.win)
 
 # Set up control bindings
 controls.setup_controls()
@@ -29,23 +33,6 @@ base.win.request_properties(props)
 # depend on it existing.
 import colgroups
 from player import Player
-
-# # Set up the ground, which is an infinite plane (for now)
-# ground_node = BulletRigidBodyNode("Ground")
-# # ground_node.add_shape(BulletPlaneShape(Vec3(0, 0, 1), 0)) # normal, const)
-# box = BulletBoxShape(Vec3(100, 100, 2))
-# ground_node.add_shape(box)
-# ground_nodepath = base.render.attach_new_node(ground_node)
-# ground_nodepath.set_z(-10)
-# ground_nodepath.set_collide_mask(BitMask32.bit(colgroups.ENV_GROUP))
-# base.world.attach_rigid_body(ground_node)
-
-# wall = BulletBoxShape(Vec3(2, 100, 100))
-# wall_node = BulletRigidBodyNode("Wall")
-# wall_node.add_shape(wall)
-# wall_nodepath = base.render.attach_new_node(wall_node)
-# wall_nodepath.set_collide_mask(BitMask32.bit(colgroups.ENV_GROUP))
-# base.world.attach_rigid_body(wall_node)
 
 # Create the world mesh and collision solid
 world_model = base.loader.load_model("assets/models/world.egg")
@@ -80,7 +67,7 @@ world_model.set_material(world_mat)
 # Set up the bullet debug renderer so we can see what's happening
 debug_node = BulletDebugNode()
 debug_node.show_wireframe(True)
-#render.attach_new_node(debug_node).show()
+render.attach_new_node(debug_node).show()
 base.world.set_debug_node(debug_node)
 
 player = Player()
