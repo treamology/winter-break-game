@@ -1,4 +1,4 @@
-from panda3d.core import NodePath, Vec3, PandaNode, BitMask32
+from panda3d.core import NodePath, Vec3, PandaNode, BitMask32, Vec2
 from panda3d.bullet import BulletRigidBodyNode, BulletSphereShape
 
 from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND, FIRE_BIND
@@ -6,7 +6,7 @@ from controls import control_state
 
 from projectile import Projectile
 
-from math import sin, cos, radians
+from math import sin, cos, radians, degrees, asin, sqrt
 
 import colgroups
 from camera import CameraControl
@@ -18,7 +18,7 @@ class Player(object):
 	stop_threshold = 0.5
 	max_speed = 20
 
-	bullet_speed = 2
+	bullet_speed = 80
 	fire_rate = 0.2
 
 	fire_accum = 0
@@ -103,8 +103,19 @@ class Player(object):
 
 		if control_state[FIRE_BIND] == 1:
 			if (self.fire_accum >= self.fire_rate):
+				grav = base.world.get_gravity().get_z()
+				pitch = self.cam_control.cam_pitch
+				height = self.cam_control.cam_hover_distance
+				fire_angle = asin(sqrt((-2*grav*cos(radians(pitch))*height)/(self.bullet_speed * self.bullet_speed))) + radians(self.cam_control.cam_pitch)
+
 				projectile = Projectile()
-				projectile.fire(self.nodepath.get_pos(), Vec3(sin(radians(self.cam_control.cam_heading)), cos(radians(self.cam_control.cam_heading)), 0) * self.bullet_speed)
+				projectile.fire(self.nodepath.get_pos(),
+					Vec3(
+						sin(radians(self.cam_control.cam_heading))*cos(fire_angle),
+						cos(radians(self.cam_control.cam_heading))*cos(fire_angle),
+						sin(fire_angle)
+					) * self.bullet_speed)
+
 				self.fire_accum = 0
 
 		if (self.fire_accum < self.fire_rate):

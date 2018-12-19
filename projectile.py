@@ -23,4 +23,4 @@ class Projectile(object):
 		base.world.attach_rigid_body(self.node)
 		self.nodepath.reparentTo(base.render)
 		self.nodepath.set_pos(from_pos)
-		self.node.apply_central_impulse(vector)
+		self.node.set_linear_velocity(vector)
