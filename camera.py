@@ -1,5 +1,5 @@
 from panda3d.bullet import BulletSphereShape, BulletGhostNode
-from panda3d.core import PandaNode, NodePath, Vec3, TransparencyAttrib, SamplerState
+from panda3d.core import PandaNode, NodePath, Vec3, TransparencyAttrib, SamplerState, BitMask32
 
 from direct.gui.OnscreenImage import OnscreenImage
 
@@ -40,6 +40,9 @@ class CameraControl(object):
 		self.abs_crosshair.set_centered(True, True)
 		self.abs_crosshair.set_size(14, 14)
 
+		self.cam_ray_bitmask = BitMask32.all_on()
+		self.cam_ray_bitmask.clear_bit(colgroups.PLAYER_GROUP)
+
 	def take_camera_control(self):
 		base.camera.reparent_to(self.cam_origin)
 		base.camera.set_pos(0, 0, self.cam_hover_distance)
@@ -74,9 +77,12 @@ class CameraControl(object):
 		cam_origin_dir_vec *= self.dist_from_player
 		global_max_cam_extension = global_player_pos + cam_origin_dir_vec
 
-		result = base.world.ray_test_closest(global_player_pos, global_max_cam_extension)
+		result = base.world.ray_test_closest(global_player_pos, global_max_cam_extension, self.cam_ray_bitmask)
 
 		hit_frac = result.get_hit_fraction() if result.has_hit() else 1
+
+		if result.has_hit():
+			base.col_notify.debug("Camera ray has collided with " + result.get_node().get_name() + " with fraction " + str(result.get_hit_fraction()))
 
 		self.cam_origin.set_y(-self.dist_from_player * hit_frac)
 
