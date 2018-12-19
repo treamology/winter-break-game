@@ -8,7 +8,9 @@ from panda3d.bullet import BulletDebugNode
 import controls
 from lui.LUIRegion import LUIRegion
 
-loadPrcFile("config.prc")
+import os
+
+loadPrcFile(os.path.abspath("./config.prc"))
 
 # Initialize ShowBase and some basic options.
 base = ShowBase()
