@@ -1,3 +1,5 @@
+from direct.directnotify.DirectNotify import DirectNotify
+
 PLAYER_GROUP = 0
 ENV_GROUP = 1
 PLAYER_BULLET_GROUP = 2
@@ -9,3 +11,5 @@ base.world.set_group_collision_flag(PLAYER_BULLET_GROUP, PLAYER_BULLET_GROUP, Fa
 base.world.set_group_collision_flag(ENV_GROUP, PLAYER_GROUP, True)
 base.world.set_group_collision_flag(ENV_GROUP, PLAYER_BULLET_GROUP, True)
 base.world.set_group_collision_flag(ENV_GROUP, CAMERA_GROUP, True)
+
+base.col_notify = DirectNotify().newCategory("Collision")
