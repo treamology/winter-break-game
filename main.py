@@ -52,19 +52,20 @@ world_nodepath = base.render.attach_new_node(world_node)
 world_nodepath.set_collide_mask(BitMask32.bit(colgroups.ENV_GROUP))
 world_nodepath.set_z(-5)
 world_nodepath.set_p(90)
+world_model.set_color(150/255, 123/255, 182/255, 1)
 world_model.reparentTo(world_nodepath)
 base.world.attach_rigid_body(world_node)
 
 # Add some lighting
-light = PointLight("Light")
-light.set_color(Vec3(1, 1, 1))
-light_np = base.render.attach_new_node(light)
-light_np.set_pos(0, 0, 50)
-base.render.set_light(light_np)
+# light = PointLight("Light")
+# light.set_color(Vec3(1, 1, 1))
+# light_np = base.render.attach_new_node(light)
+# light_np.set_pos(0, 0, 50)
+# base.render.set_light(light_np)
 
-world_mat = Material()
-world_mat.set_diffuse((150/255, 123/255, 182/255, 1))
-world_model.set_material(world_mat)
+# world_mat = Material()
+# world_mat.set_diffuse((150/255, 123/255, 182/255, 1))
+# world_model.set_material(world_mat)
 
 # Set up the bullet debug renderer so we can see what's happening
 debug_node = BulletDebugNode()
