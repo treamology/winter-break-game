@@ -6,6 +6,10 @@ from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, B
 from panda3d.bullet import BulletDebugNode
 
 import controls
+import mouse
+import colgroups
+from player import Player
+
 from lui.LUIRegion import LUIRegion
 
 import os
@@ -27,14 +31,11 @@ base.world = BulletWorld()
 base.world.set_gravity(Vec3(0, 0, -9.81))
 
 # Set mouse to relative mode for camera movement
-props = WindowProperties()
-props.set_mouse_mode(WindowProperties.M_relative)
-base.win.request_properties(props)
+mouse.capture_mouse()
 
 # Now that we have the basic stuff set up, we can continue importing things that
 # depend on it existing.
-import colgroups
-from player import Player
+colgroups.init()
 
 # Create the world mesh and collision solid
 world_model = base.loader.load_model("assets/models/world.egg")
@@ -51,7 +52,7 @@ world_node.add_shape(mesh_shape)
 world_nodepath = base.render.attach_new_node(world_node)
 world_nodepath.set_collide_mask(BitMask32.bit(colgroups.ENV_GROUP))
 world_nodepath.set_z(-5)
-world_nodepath.set_p(90)
+world_nodepath.set_p(270)
 world_model.set_color(150/255, 123/255, 182/255, 1)
 world_model.reparentTo(world_nodepath)
 base.world.attach_rigid_body(world_node)
@@ -70,7 +71,7 @@ base.world.attach_rigid_body(world_node)
 # Set up the bullet debug renderer so we can see what's happening
 debug_node = BulletDebugNode()
 debug_node.show_wireframe(True)
-render.attach_new_node(debug_node).show()
+base.render.attach_new_node(debug_node).show()
 base.world.set_debug_node(debug_node)
 
 player = Player()
@@ -86,7 +87,7 @@ def physics_update(task):
 base.task_mgr.add(physics_update, "phsyics_update", sort=2)
 base.task_mgr.add(player.process_inputs, "input_update", sort=1)
 
-base.accept("escape", quit)
+base.accept("escape", mouse.toggle_mouse)
 
 # Kick off the game loop
 base.run()
