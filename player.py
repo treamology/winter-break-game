@@ -78,11 +78,12 @@ class Player(object):
             self.node.set_linear_velocity(vel)
         # Limit the velocity if we're going too fast
         elif linvel.get_xy().length() > self.max_speed:
-            vel = linvel
+            prev_length = linvel.length()
             linvel.normalize()
-            vel.set_x(self.max_speed * linvel.get_x())
-            vel.set_y(self.max_speed * linvel.get_y())
-            self.node.set_linear_velocity(vel)
+            linvel.set_x(self.max_speed * linvel.get_x())
+            linvel.set_y(self.max_speed * linvel.get_y())
+            linvel.set_z(linvel.get_z() * prev_length)
+            self.node.set_linear_velocity(linvel)
         # Nothing is being input, so slow down the sphere so it doesn't roll off to infinity
         elif total_force == core.Vec3.zero():
             total_force = -self.node.get_linear_velocity()
