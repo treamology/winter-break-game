@@ -6,7 +6,6 @@ this = sys.modules[__name__]
 this.mouse_captured = False
 
 def capture_mouse():
-    print("Capture mouse")
     this.mouse_captured = True
     props = WindowProperties()
     props.set_mouse_mode(WindowProperties.M_relative)
@@ -14,7 +13,6 @@ def capture_mouse():
     base.win.request_properties(props)
 
 def relinquish_mouse():
-    print("Reliniquish mouse")
     this.mouse_captured = False
     props = WindowProperties()
     props.set_mouse_mode(WindowProperties.M_absolute)

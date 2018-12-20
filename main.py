@@ -96,7 +96,7 @@ def physics_update(task):
 	
 	return task.cont
 
-base.task_mgr.add(physics_update, "phsyics_update", sort=2)
+base.task_mgr.add(physics_update, "physics_update", sort=2)
 base.task_mgr.add(player.process_inputs, "input_update", sort=1)
 
 base.gamestate.go_ingame()
