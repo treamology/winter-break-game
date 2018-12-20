@@ -1,8 +1,7 @@
 from direct.showbase.ShowBase import ShowBase
-from direct.task import Task
 
-from panda3d.core import Vec3, Vec4, loadPrcFile, BitMask32, WindowProperties, PointLight, Material
-from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, BulletBoxShape, BulletTriangleMesh, BulletTriangleMeshShape
+from panda3d.core import Vec3, loadPrcFile, BitMask32
+from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletTriangleMesh, BulletTriangleMeshShape
 from panda3d.bullet import BulletDebugNode
 
 import controls
@@ -14,11 +13,24 @@ from lui.LUIRegion import LUIRegion
 
 import os
 
+class GameState(object):
+	"""Some state that applies globally"""
+	ingame = False
+
+	def go_ingame(self):
+		"""Allows mouse to be captured and released"""
+		base.accept("escape", mouse.toggle_mouse)
+
+	def leave_ingame(self):
+		"""Undoes whatever was done by `go_ingame()`"""
+		pass
+
 loadPrcFile(os.path.abspath("./config.prc"))
 
 # Initialize ShowBase and some basic options.
 base = ShowBase()
 base.disable_mouse()
+base.gamestate = GameState()
 
 # Set up LUI
 base.lui_region = LUIRegion.make("HUD", base.win)
@@ -87,7 +99,7 @@ def physics_update(task):
 base.task_mgr.add(physics_update, "phsyics_update", sort=2)
 base.task_mgr.add(player.process_inputs, "input_update", sort=1)
 
-base.accept("escape", mouse.toggle_mouse)
+base.gamestate.go_ingame()
 
 # Kick off the game loop
 base.run()
