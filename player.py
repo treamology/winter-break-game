@@ -1,5 +1,5 @@
-from panda3d.core import NodePath, Vec3, BitMask32
-from panda3d.bullet import BulletRigidBodyNode, BulletSphereShape
+from panda3d import core, bullet
+from direct.task import Task
 
 from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND, FIRE_BIND
 from controls import control_state
@@ -14,30 +14,30 @@ from camera import CameraControl
 
 class Player(object):
 
-    ground_accel = 90
-    slowdown_rate = 45
-    stop_threshold = 0.5
-    max_speed = 20
+    ground_accel: float = 90
+    slowdown_rate: float = 45
+    stop_threshold: float = 0.5
+    max_speed: float = 20
 
-    bullet_speed = 80
-    fire_rate = 0.2
+    bullet_speed: float = 80
+    fire_rate: float = 0.2
 
-    fire_accum = 0
+    fire_accum: float = 0
 
     def __init__(self):
-        self.shape = BulletSphereShape(1)
+        self.shape = bullet.BulletSphereShape(1)
 
-        self.node = BulletRigidBodyNode("Player")
+        self.node = bullet.BulletRigidBodyNode("Player")
         self.node.set_mass(1)
         self.node.add_shape(self.shape)
 
         # We're controlling the acceleration ourselves, we don't want friction interfering
         self.node.set_friction(0)
 
-        self.nodepath = NodePath(self.node)
-        self.nodepath.set_collide_mask(BitMask32.bit(colgroups.PLAYER_GROUP))
+        self.nodepath = core.NodePath(self.node)
+        self.nodepath.set_collide_mask(core.BitMask32.bit(colgroups.PLAYER_GROUP))
 
-        self.model_node = base.loader.load_model("models/smiley.egg")
+        self.model_node: core.NodePath = base.loader.load_model("models/smiley.egg")
         self.model_node.reparent_to(self.nodepath)
 
         self.cam_control = CameraControl(self.nodepath)
@@ -47,11 +47,11 @@ class Player(object):
         base.world.attach_rigid_body(self.node)
         self.nodepath.reparent_to(base.render)
 
-    def process_inputs(self, task):
+    def process_inputs(self, task: Task) -> int:
         if not mouse.mouse_captured:
             return task.cont
 
-        total_force = Vec3(0, 0, 0)
+        total_force = core.Vec3(0, 0, 0)
 
         if control_state[FORWARD_BIND] != 0:
             total_force.x += control_state[FORWARD_BIND] * self.ground_accel * sin(radians(self.cam_control.cam_heading))
@@ -66,14 +66,14 @@ class Player(object):
             total_force.x += control_state[RIGHT_BIND] * self.ground_accel * cos(radians(self.cam_control.cam_heading))
             total_force.y += control_state[RIGHT_BIND] * -self.ground_accel * sin(radians(self.cam_control.cam_heading))
 
-        if total_force != Vec3.zero() and not self.node.is_active():
+        if total_force != core.Vec3.zero() and not self.node.is_active():
             self.node.set_active(True)
 
         linvel = self.node.get_linear_velocity()
 
         # If the velocity is below a certain point, just stop it.
         if linvel.get_xy().length() < self.stop_threshold:
-            vel = Vec3()
+            vel = core.Vec3()
             vel.set_z(linvel.get_z())
             self.node.set_linear_velocity(vel)
         # Limit the velocity if we're going too fast
@@ -84,7 +84,7 @@ class Player(object):
             vel.set_y(self.max_speed * linvel.get_y())
             self.node.set_linear_velocity(vel)
         # Nothing is being input, so slow down the sphere so it doesn't roll off to infinity
-        elif total_force == Vec3.zero():
+        elif total_force == core.Vec3.zero():
             total_force = -self.node.get_linear_velocity()
             total_force.normalize()
             total_force *= self.slowdown_rate
@@ -114,7 +114,7 @@ class Player(object):
                 # Calculate the real velocity using the way the player is facing,
                 # the angle upwards the ball should be shot, and the player's current
                 # linear velocity.
-                bullet_velocity = Vec3(
+                bullet_velocity = core.Vec3(
                     sin(radians(self.cam_control.cam_heading))*cos(fire_angle),
                     cos(radians(self.cam_control.cam_heading))*cos(fire_angle),
                     sin(fire_angle)

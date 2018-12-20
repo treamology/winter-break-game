@@ -1,4 +1,5 @@
-from panda3d.core import PandaNode, NodePath, SamplerState, BitMask32
+from panda3d import core
+from direct.task import Task
 
 from lui.LUISprite import LUISprite
 
@@ -7,44 +8,44 @@ import mouse
 
 class CameraControl(object):
 
-	prev_mouse_x = None
-	prev_mouse_y = None
+	prev_mouse_x: float = None
+	prev_mouse_y: float = None
 
-	cam_hover_distance = 2
-	dist_from_player = 20
+	cam_hover_distance: float = 2
+	dist_from_player: float = 20
 
-	cam_heading = 0
-	cam_pitch = 0
+	cam_heading: float = 0
+	cam_pitch: float = 0
 
-	mouse_sens = 20
+	mouse_sens: float = 20
 
-	def __init__(self, player_node):
+	def __init__(self, player_node: core.NodePath):
 		self.mw = base.mouseWatcherNode
 		self.player_node = player_node
 
-		self.rot_origin = NodePath(PandaNode("rot_origin"))
+		self.rot_origin = core.NodePath(core.PandaNode("rot_origin"))
 		self.rot_origin.reparent_to(self.player_node)
 		self.rot_origin.set_compass()
 
-		self.cam_origin = NodePath(PandaNode("cam_origin"))
+		self.cam_origin = core.NodePath(core.PandaNode("cam_origin"))
 		self.cam_origin.reparent_to(self.rot_origin)
 		self.cam_origin.set_pos(0, -self.dist_from_player, 0)
 
-		self.abs_crosshair_tex = base.loader.load_texture("assets/ui/crosshair.png")
-		self.abs_crosshair_tex.setMinfilter(SamplerState.FT_nearest)
-		self.abs_crosshair_tex.setMagfilter(SamplerState.FT_nearest)
+		self.abs_crosshair_tex: core.Texture = base.loader.load_texture("assets/ui/crosshair.png")
+		self.abs_crosshair_tex.setMinfilter(core.SamplerState.FT_nearest)
+		self.abs_crosshair_tex.setMagfilter(core.SamplerState.FT_nearest)
 		self.abs_crosshair = LUISprite(base.lui_region.root, self.abs_crosshair_tex)
 		self.abs_crosshair.set_centered(True, True)
 		self.abs_crosshair.set_size(14, 14)
 
-		self.cam_ray_bitmask = BitMask32.bit(colgroups.ENV_GROUP)
+		self.cam_ray_bitmask: core.BitMask32 = core.BitMask32.bit(colgroups.ENV_GROUP)
 
 	def take_camera_control(self):
 		base.camera.reparent_to(self.cam_origin)
 		base.camera.set_pos(0, 0, self.cam_hover_distance)
 		base.task_mgr.add(self.camera_update, "camera_update")
 
-	def camera_update(self, task):
+	def camera_update(self, task: Task) -> int:
 		if not self.mw.has_mouse() or not mouse.mouse_captured:
 			return task.cont
 

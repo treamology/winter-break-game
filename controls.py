@@ -1,10 +1,12 @@
+from typing import Dict
+
 FORWARD_BIND = "w"
 BACKWARD_BIND = "s"
 LEFT_BIND = "a"
 RIGHT_BIND = "d"
 FIRE_BIND = "mouse1"
 
-control_state = {
+control_state: Dict[str, float] = {
 	FORWARD_BIND: 0,
 	BACKWARD_BIND: 0,
 	LEFT_BIND: 0,
@@ -12,7 +14,7 @@ control_state = {
 	FIRE_BIND: 0
 }
 
-def _change_control_state(control, state):
+def _change_control_state(control: str, state: float):
 	control_state[control] = state
 
 def setup_controls():

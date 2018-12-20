@@ -1,8 +1,5 @@
+from panda3d import core, bullet
 from direct.showbase.ShowBase import ShowBase
-
-from panda3d.core import Vec3, loadPrcFile, BitMask32
-from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletTriangleMesh, BulletTriangleMeshShape
-from panda3d.bullet import BulletDebugNode
 
 import controls
 import mouse
@@ -15,7 +12,7 @@ import os
 
 class GameState(object):
 	"""Some state that applies globally"""
-	ingame = False
+	ingame: bool = False
 
 	def go_ingame(self):
 		"""Allows mouse to be captured and released"""
@@ -25,22 +22,22 @@ class GameState(object):
 		"""Undoes whatever was done by `go_ingame()`"""
 		pass
 
-loadPrcFile(os.path.abspath("./config.prc"))
+core.loadPrcFile(os.path.abspath("./config.prc"))
 
 # Initialize ShowBase and some basic options.
 base = ShowBase()
 base.disable_mouse()
-base.gamestate = GameState()
+base.game_state: GameState = GameState()
 
 # Set up LUI
-base.lui_region = LUIRegion.make("HUD", base.win)
+base.lui_region: LUIRegion = LUIRegion.make("HUD", base.win)
 
 # Set up control bindings
 controls.setup_controls()
 
 # Initialize the physics world
-base.world = BulletWorld()
-base.world.set_gravity(Vec3(0, 0, -9.81))
+base.world = bullet.BulletWorld()
+base.world.set_gravity(core.Vec3(0, 0, -9.81))
 
 # Set mouse to relative mode for camera movement
 mouse.capture_mouse()
@@ -51,22 +48,26 @@ colgroups.init()
 
 # Create the world mesh and collision solid
 world_model = base.loader.load_model("assets/models/world.egg")
+
 geom = None
 for geom_np in world_model.findAllMatches('**/+GeomNode'):
 	geom_node = geom_np.node()
 	geom = geom_node.get_geom(0)
 	break
-mesh = BulletTriangleMesh()
+
+mesh = bullet.BulletTriangleMesh()
 mesh.add_geom(geom)
-mesh_shape = BulletTriangleMeshShape(mesh, dynamic=False)
-world_node = BulletRigidBodyNode("World")
+
+mesh_shape = bullet.BulletTriangleMeshShape(mesh, dynamic=False)
+world_node = bullet.BulletRigidBodyNode("World")
 world_node.add_shape(mesh_shape)
 world_nodepath = base.render.attach_new_node(world_node)
-world_nodepath.set_collide_mask(BitMask32.bit(colgroups.ENV_GROUP))
+world_nodepath.set_collide_mask(core.BitMask32.bit(colgroups.ENV_GROUP))
 world_nodepath.set_z(-5)
 world_nodepath.set_p(270)
 world_model.set_color(150/255, 123/255, 182/255, 1)
 world_model.reparentTo(world_nodepath)
+
 base.world.attach_rigid_body(world_node)
 
 # Add some lighting
@@ -81,7 +82,7 @@ base.world.attach_rigid_body(world_node)
 # world_model.set_material(world_mat)
 
 # Set up the bullet debug renderer so we can see what's happening
-debug_node = BulletDebugNode()
+debug_node = bullet.BulletDebugNode()
 debug_node.show_wireframe(True)
 base.render.attach_new_node(debug_node).show()
 base.world.set_debug_node(debug_node)
@@ -99,7 +100,7 @@ def physics_update(task):
 base.task_mgr.add(physics_update, "physics_update", sort=2)
 base.task_mgr.add(player.process_inputs, "input_update", sort=1)
 
-base.gamestate.go_ingame()
+base.game_state.go_ingame()
 
 # Kick off the game loop
 base.run()
