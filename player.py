@@ -1,7 +1,7 @@
 from panda3d import core, bullet
 from direct.task import Task
 
-from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND, FIRE_BIND
+from controls import FORWARD_BIND, BACKWARD_BIND, LEFT_BIND, RIGHT_BIND, FIRE_BIND, JUMP_BIND
 from controls import control_state
 
 from projectile import Projectile
@@ -19,10 +19,14 @@ class Player(object):
     stop_threshold: float = 0.5
     max_speed: float = 20
 
-    bullet_speed: float = 80
-    fire_rate: float = 0.2
+    bullet_speed: float = 40
+    fire_rate: float = 0.1
+
+    jump_speed: float = 6
+    jump_hold_time: float = 0.2  # How long holding the spacebar will affect the height of the jump
 
     fire_accum: float = 0
+    jump_accum: float = 0
 
     def __init__(self):
         self.shape = bullet.BulletSphereShape(1)
@@ -51,6 +55,7 @@ class Player(object):
         if not mouse.mouse_captured:
             return task.cont
 
+        dt = globalClock.get_dt()
         total_force = core.Vec3(0, 0, 0)
 
         if control_state[FORWARD_BIND] != 0:
@@ -130,6 +135,29 @@ class Player(object):
         # I don't know if it's actually possible to overflow this number, but
         # just to be safe...
         if self.fire_accum < self.fire_rate:
-            self.fire_accum += globalClock.get_dt()
+            self.fire_accum += dt
+
+        if control_state[JUMP_BIND] == 1:
+            if self.jump_accum <= self.jump_hold_time:
+                print("jump frame " + str(self.jump_accum))
+                vel = self.node.get_linear_velocity()
+                vel.set_z(self.jump_speed)
+                print(vel)
+                self.node.set_linear_velocity(vel)
+
+                self.jump_accum += dt
+        elif self.touching_ground():
+            # Reset the accumulator and allow another jump once the player touches the ground
+            self.jump_accum = 0
 
         return task.cont
+
+    def touching_ground(self) -> bool:
+        result = base.world.contact_test(self.node)
+
+        for contact in result.get_contacts():
+            if contact.get_node1().get_name() == "World":
+                normal = contact.get_manifold_point().get_normal_world_on_b()
+                return normal.get_z() > 0.5
+
+        return False
