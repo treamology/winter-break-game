@@ -11,16 +11,16 @@ from lui.LUIRegion import LUIRegion
 import os
 
 class GameState(object):
-	"""Some state that applies globally"""
-	ingame: bool = False
+    """Some state that applies globally"""
+    ingame: bool = False
 
-	def go_ingame(self):
-		"""Allows mouse to be captured and released"""
-		base.accept("escape", mouse.toggle_mouse)
+    def go_ingame(self):
+        """Allows mouse to be captured and released"""
+        base.accept("escape", mouse.toggle_mouse)
 
-	def leave_ingame(self):
-		"""Undoes whatever was done by `go_ingame()`"""
-		pass
+    def leave_ingame(self):
+        """Undoes whatever was done by `go_ingame()`"""
+        pass
 
 core.loadPrcFile(os.path.abspath("./config.prc"))
 
@@ -51,9 +51,9 @@ world_model = base.loader.load_model("assets/models/world.egg")
 
 geom = None
 for geom_np in world_model.findAllMatches('**/+GeomNode'):
-	geom_node = geom_np.node()
-	geom = geom_node.get_geom(0)
-	break
+    geom_node = geom_np.node()
+    geom = geom_node.get_geom(0)
+    break
 
 mesh = bullet.BulletTriangleMesh()
 mesh.add_geom(geom)
@@ -80,11 +80,11 @@ player = Player()
 player.add_to_world()
 
 def physics_update(task):
-	# Progress the physics world every frame
-	dt = globalClock.get_dt()
-	base.world.do_physics(dt)
-	
-	return task.cont
+    # Progress the physics world every frame
+    dt = globalClock.get_dt()
+    base.world.do_physics(dt)
+
+    return task.cont
 
 base.task_mgr.add(physics_update, "physics_update", sort=2)
 base.task_mgr.add(player.process_inputs, "input_update", sort=1)
