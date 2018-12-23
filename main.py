@@ -37,7 +37,7 @@ controls.setup_controls()
 
 # Initialize the physics world
 base.world = bullet.BulletWorld()
-base.world.set_gravity(core.Vec3(0, 0, -30))
+base.world.set_gravity(core.Vec3(0, 0, -9.81))
 
 # Set mouse to relative mode for camera movement
 mouse.capture_mouse()
@@ -73,6 +73,9 @@ base.world.attach_rigid_body(world_node)
 # Set up the bullet debug renderer so we can see what's happening
 debug_node = bullet.BulletDebugNode()
 debug_node.show_wireframe(True)
+debug_node.show_normals(False)
+debug_node.show_bounding_boxes(False)
+debug_node.show_constraints(False)
 base.render.attach_new_node(debug_node).show()
 base.world.set_debug_node(debug_node)
 

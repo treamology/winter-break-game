@@ -11,8 +11,8 @@ class CameraControl(object):
 	prev_mouse_x: float = None
 	prev_mouse_y: float = None
 
-	cam_hover_distance: float = 2
-	dist_from_player: float = 20
+	cam_hover_distance: float = 0.5
+	dist_from_player: float = 5
 
 	cam_heading: float = 0
 	cam_pitch: float = 0

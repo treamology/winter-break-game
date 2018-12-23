@@ -14,22 +14,22 @@ from camera import CameraControl
 
 class Player(object):
 
-    ground_accel: float = 90
-    slowdown_rate: float = 45
-    stop_threshold: float = 0.5
-    max_speed: float = 20
+    ground_accel: float = 25
+    slowdown_rate: float = 12
+    stop_threshold: float = 0.2
+    max_speed: float = 5
 
-    bullet_speed: float = 40
+    bullet_speed: float = 10
     fire_rate: float = 0.1
 
-    jump_speed: float = 6
+    jump_speed: float = 1.5
     jump_hold_time: float = 0.2  # How long holding the spacebar will affect the height of the jump
 
     fire_accum: float = 0
     jump_accum: float = 0
 
     def __init__(self):
-        self.shape = bullet.BulletSphereShape(1)
+        self.shape = bullet.BulletSphereShape(0.25)
 
         self.node = bullet.BulletRigidBodyNode("Player")
         self.node.set_mass(1)
@@ -43,6 +43,7 @@ class Player(object):
 
         self.model_node: core.NodePath = base.loader.load_model("models/smiley.egg")
         self.model_node.reparent_to(self.nodepath)
+        self.model_node.set_scale(0.25)
 
         self.cam_control = CameraControl(self.nodepath)
         self.cam_control.take_camera_control()

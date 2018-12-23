@@ -4,20 +4,20 @@ import colgroups
 
 class Projectile(object):
 	def __init__(self):
-		self.shape = bullet.BulletSphereShape(0.2)
+		self.shape = bullet.BulletSphereShape(0.05)
 
 		self.node = bullet.BulletRigidBodyNode("Projectile")
 		self.node.add_shape(self.shape)
 		self.node.set_mass(.2)
 		self.node.set_ccd_motion_threshold(.1)
-		self.node.set_ccd_swept_sphere_radius(.2)
+		self.node.set_ccd_swept_sphere_radius(.05)
 
 		self.nodepath = core.NodePath(self.node)
 		self.nodepath.set_collide_mask(core.BitMask32.bit(colgroups.PLAYER_BULLET_GROUP))
 
 		self.model: core.NodePath = base.loader.load_model("models/smiley.egg")
 		self.model.set_color(1, 0, 0, 1)
-		self.model.set_scale(0.2)
+		self.model.set_scale(0.05)
 		self.model.reparentTo(self.nodepath)
 
 	def fire(self, from_pos: core.Vec3, vector: core.Vec3):
