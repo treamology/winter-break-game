@@ -140,10 +140,8 @@ class Player(object):
 
         if control_state[JUMP_BIND] == 1:
             if self.jump_accum <= self.jump_hold_time:
-                print("jump frame " + str(self.jump_accum))
                 vel = self.node.get_linear_velocity()
                 vel.set_z(self.jump_speed)
-                print(vel)
                 self.node.set_linear_velocity(vel)
 
                 self.jump_accum += dt
