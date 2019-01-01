@@ -27,6 +27,7 @@ core.loadPrcFile(os.path.abspath("./config.prc"))
 # Initialize ShowBase and some basic options.
 base = ShowBase()
 base.disable_mouse()
+base.set_background_color(0, 0, 0, 1)
 base.game_state: GameState = GameState()
 
 # Set up LUI
@@ -47,7 +48,11 @@ mouse.capture_mouse()
 colgroups.init()
 
 # Create the world mesh and collision solid
+environment_node = base.render.attach_new_node("Environment")
 world_model = base.loader.load_model("assets/models/test_scene.egg")
+world_tex = base.loader.loadTexture("assets/textures/proto_texture.png")
+world_tex.set_format(core.Texture.F_srgb_alpha)
+world_model.set_texture(world_tex)
 
 geom = None
 for geom_np in world_model.findAllMatches('**/+GeomNode'):
@@ -61,7 +66,7 @@ mesh.add_geom(geom)
 mesh_shape = bullet.BulletTriangleMeshShape(mesh, dynamic=False)
 world_node = bullet.BulletRigidBodyNode("World")
 world_node.add_shape(mesh_shape)
-world_nodepath = base.render.attach_new_node(world_node)
+world_nodepath = environment_node.attach_new_node(world_node)
 world_nodepath.set_collide_mask(core.BitMask32.bit(colgroups.ENV_GROUP))
 world_nodepath.set_z(-5)
 # world_nodepath.set_p(90)
@@ -86,13 +91,13 @@ player.add_to_world()
 world_material = core.Material()
 world_material.set_shininess(50.0) #Make this material shiny
 white = core.LColor(1, 1, 1, 1)
-world_material.set_base_color((150/255, 123/255, 182/255, 1))
+# world_material.set_base_color((150/255, 123/255, 182/255, 1))
 #world_material.setAmbient((150/255, 123/255, 182/255, 1))
 world_model.set_material(world_material)
 print(world_material.get_specular())
 
 player_material = core.Material()
-player_material.set_shininess(50.0)
+player_material.set_shininess(100.0)
 player_material.set_diffuse((0,0,0,1))
 player_material.set_specular((1,1,1,1))
 # player_material.set_base_color((0.7, 0.7, 0.7, 1))
@@ -102,23 +107,15 @@ light = core.PointLight("Light")
 light.set_color(core.Vec3(1, 1, 1))
 light.set_attenuation((1, 0.045, 0.0075))
 light.set_shadow_caster(True, 512, 512)
-#light.set_max_distance(0)
+# light.set_max_distance()
 light_np = base.render.attach_new_node(light)
 light_np.set_pos(0, 0, -2)
 base.render.set_light(light_np)
 
-# Directional light 02
-# directionalLight = core.DirectionalLight('directionalLight')
-# directionalLight.set_shadow_caster(True, 512, 512)
-# directionalLightNP = base.render.attachNewNode(directionalLight)
-# # This light is facing forwards, away from the camera.
-# directionalLightNP.setHpr(0, -5, 0)
-# base.render.setLight(directionalLightNP)
-
 alight = core.AmbientLight('alight')
 alight.setColor(core.VBase4(0.2, 0.2, 0.2, 1))
-alnp = base.render.attachNewNode(alight)
-base.render.setLight(alnp)
+alnp = environment_node.attachNewNode(alight)
+environment_node.setLight(alnp)
 
 shader: core.Shader = core.Shader.load(core.Shader.SL_GLSL, vertex="assets/shaders/vertex.glsl", fragment="assets/shaders/fragment.glsl")
 base.render.set_shader_input("cam_pos", base.camera.get_pos())
