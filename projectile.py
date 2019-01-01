@@ -9,8 +9,8 @@ class Projectile(object):
 		self.node = bullet.BulletRigidBodyNode("Projectile")
 		self.node.add_shape(self.shape)
 		self.node.set_mass(.2)
-		self.node.set_ccd_motion_threshold(.1)
-		self.node.set_ccd_swept_sphere_radius(.05)
+		# self.node.set_ccd_motion_threshold(.1)
+		# self.node.set_ccd_swept_sphere_radius(.05)
 
 		self.nodepath = core.NodePath(self.node)
 		self.nodepath.set_collide_mask(core.BitMask32.bit(colgroups.PLAYER_BULLET_GROUP))
