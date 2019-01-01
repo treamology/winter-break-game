@@ -20,7 +20,7 @@ class LUILabel(LUIObject):
         LUIInitialState.init(self, kwargs)
         self._text = LUIText(
             self,
-            unicode(text),
+            text,
             font,
             font_size,
             0,
@@ -38,7 +38,7 @@ class LUILabel(LUIObject):
         if self._have_shadow:
             self._shadow_text = LUIText(
                 self,
-                unicode(text),
+                text,
                 font,
                 font_size,
                 0,
@@ -60,9 +60,9 @@ class LUILabel(LUIObject):
 
     def set_text(self, text):
         """ Sets the text of the label """
-        self._text.text = unicode(text)
+        self._text.text = text
         if self._have_shadow:
-            self._shadow_text.text = unicode(text)
+            self._shadow_text.text = text
 
     text = property(get_text, set_text)
 
